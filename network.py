@@ -2,122 +2,155 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
 
+# Load data from CSV files
+dfNames = pd.read_csv('../cs230_project/data/names230.csv')
+dfHelp = pd.read_csv('../cs230_project/data/help.csv')
+dfOutside = pd.read_csv('../cs230_project/data/outside.csv')
 
 
-
-#alph = string.ascii_uppercase
-#for i in alph:
-#    G.add_node(i)
+name = input("Enter First and Last Name or x for entire network: ")
 
 
-dfNames = pd.read_csv('../cs230_project/names230.csv')
-dfHelp = pd.read_csv('../cs230_project/help.csv')
-dfOutside = pd.read_csv('../cs230_project/outside.csv')
-
-name = input("Enter First and Last Name: \n")
-
-##Names
-nameRow_Names = dfNames[dfNames["Name:"] == name]
-nameRow_Names = nameRow_Names.drop(columns="Name:")
-
-#Help
-nameRow_Help = dfHelp[dfHelp["Name:"] == name]
-nameRow_Help = nameRow_Help.drop(columns="Name:")
-
-##Outside
-nameRow_Outside = dfOutside[dfOutside["Name:"] == name]
-nameRow_Outside = nameRow_Outside.drop(columns="Name:")
-
-
-
-# Reset index to get the row as a Series
-#Names
-nameRow_Names = nameRow_Names.reset_index(drop=True).iloc[0]
-linksNames = nameRow_Names[nameRow_Names == 1.0].index.tolist()
-
-#Help
-nameRow_Help = nameRow_Help.reset_index(drop=True).iloc[0]
-linksHelp = nameRow_Help[nameRow_Help == 1.0].index.tolist()
-
-#Outside
-nameRow_Outside = nameRow_Outside.reset_index(drop=True).iloc[0]
-linksOutside = nameRow_Outside[nameRow_Outside == 1.0].index.tolist()
-
-
-
-#Assigning weight
-allNames = linksNames + linksOutside + linksHelp
-
-weightsDict = {}
-
-###***
-#Runs through lists, adding 1 for each occurance
-for n in allNames:
-    if n in weightsDict:
-        weightsDict[n] += 1
-    else:
-        weightsDict[n] = 1
-            
-            
-
-
-#Drawing
-G=nx.Graph()
-#Gets all names
-names = dfNames["Name:"].tolist()
-
-G.add_nodes_from(names)
-
-for i in weightsDict:
-    G.add_edge(name, i, weight = weightsDict[i])
+def oneNetwork(name):
     
-#dict for edge weights
-edgeLabels = nx.get_edge_attributes(G, "weight")
+    
+    # Extract rows corresponding to the entered name
+    nameRow_Names = dfNames[dfNames["Name:"] == name].drop(columns="Name:")
+    nameRow_Help = dfHelp[dfHelp["Name:"] == name].drop(columns="Name:")
+    nameRow_Outside = dfOutside[dfOutside["Name:"] == name].drop(columns="Name:")
 
-pos= nx.circular_layout(G)
+    # Get list of connections for each category
+    linksNames = nameRow_Names.reset_index(drop=True).iloc[0][nameRow_Names.iloc[0] == 1.0].index.tolist()
+    linksHelp = nameRow_Help.reset_index(drop=True).iloc[0][nameRow_Help.iloc[0] == 1.0].index.tolist()
+    linksOutside = nameRow_Outside.reset_index(drop=True).iloc[0][nameRow_Outside.iloc[0] == 1.0].index.tolist()
 
 
-plt.figure(figsize=(30, 30))
-nx.draw(G,pos=pos,
-        with_labels=True,
-        node_color="red",
-        node_size=8000,
-        font_color="black",
-        font_size=20,
-        font_family="Times New Roman",
-        font_weight="bold",
-        width=5,
-        )
+    # Combine all connections and count occurrences
+    allLinks = linksNames + linksHelp + linksOutside
+    weightsDict = {n: allLinks.count(n) for n in set(allLinks)}
+    
+    
 
-nx.draw_networkx_edge_labels(G, 
-                             pos=pos, 
-                             edge_labels=edgeLabels,
-                             font_color="red",
-                             font_size=12,
-                             font_weight="bold"
-                             )
-
-plt.margins(0.02)
-plt.show()
+    # Create graph and add nodes
+    G = nx.Graph()
+    names = dfNames["Name:"].tolist()
+    G.add_nodes_from(names)
 
 
 
 
+    # Add edges with weights
+    for node, weight in weightsDict.items():
+        G.add_edge(name, node, weight=weight)
+
+    # Get edge labels and widths
+    widths = [G[u][v]["weight"] * 4 for u, v in G.edges()]
+
+    #Transparency #####NEEDS WORK
+    transList = []
+    for i in widths:
+        transList.append(float(i) / 30)
+        
+
+
+    # Use circular layout for positioning nodes
+    pos = nx.circular_layout(G)
+
+    # Extract first names for labeling
+    labels = {node: node.split()[0] for node in G.nodes()}
+
+    
+    
+    #Get node sizes and covert to a list
+    node_sizes = {node: G.degree(node) * 4000 + 1000 for node in G.nodes()} 
+    sizes = [node_sizes[node] for node in G.nodes()]
+
+
+    #Node color #### NEED WORK
+    tmp_colorList = sorted(widths)
+       
+        
+
+
+    plt.figure(figsize=(30, 30))
+    nx.draw(G, pos=pos, labels=labels, with_labels=True, node_color="red", node_size=sizes, 
+            font_color="black", font_size=20, font_family="Times New Roman", font_weight="bold", width=5)
+
+
+    nx.draw_networkx_edges(G, pos, 
+                           edgelist=G.edges(),
+                           alpha= transList
+                           )
+
+    plt.margins(0.02)
+    plt.show()
+
+
+def wholeNetwork():
+    # Create graph and add nodes
+    G = nx.Graph()
+    names = dfNames["Name:"].tolist()
+    G.add_nodes_from(names)
+
+    weightsDict = {}  # Define weightsDict outside the loop
+
+    transList = []
+    
+    for name in names:
+        # Extract rows corresponding to the entered name
+        nameRow_Names = dfNames[dfNames["Name:"] == name].drop(columns="Name:")
+        nameRow_Help = dfHelp[dfHelp["Name:"] == name].drop(columns="Name:")
+        nameRow_Outside = dfOutside[dfOutside["Name:"] == name].drop(columns="Name:")
+
+        # Get list of connections for each category
+        linksNames = nameRow_Names.reset_index(drop=True).iloc[0][nameRow_Names.iloc[0] == 1.0].index.tolist() if not nameRow_Names.empty else []
+        linksHelp = nameRow_Help.reset_index(drop=True).iloc[0][nameRow_Help.iloc[0] == 1.0].index.tolist() if not nameRow_Help.empty else []
+        linksOutside = nameRow_Outside.reset_index(drop=True).iloc[0][nameRow_Outside.iloc[0] == 1.0].index.tolist() if not nameRow_Outside.empty else []
+
+        # Combine all connections and count occurrences
+        allLinks = linksNames + linksHelp + linksOutside
+        weightsDict[name] = {n: allLinks.count(n) for n in set(allLinks)}
+        
+        
+        
+        
+
+
+    # Add edges with weights
+    for name, connections in weightsDict.items():
+        for node, weight in connections.items():
+            G.add_edge(name, node, weight=weight)
+
+    # Get widths
+    widths = [G[u][v]["weight"] * 4 for u, v in G.edges()]
+    
+
+    # Use circular layout for positioning nodes
+    pos = nx.circular_layout(G)
+
+    # Extract first names for labeling
+    labels = {node: node.split()[0] for node in G.nodes()}
+
+    # Get node sizes and convert to a list
+    node_sizes = {node: G.degree(node) * 1000 + 500 for node in G.nodes()}
+    sizes = [node_sizes[node] for node in G.nodes()]
+
+    plt.figure(figsize=(30, 30))
+    nx.draw(G, pos=pos, labels=labels, with_labels=True, node_color="red", node_size=sizes, 
+            font_color="black", font_size=20, font_family="Times New Roman", font_weight="bold", width=5)
+
+
+    nx.draw_networkx_edges(G, pos, edgelist=G.edges(), width=widths)
+
+    plt.margins(0.02)
+    plt.show()
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+if name == "x":
+    wholeNetwork()
+else:
+    oneNetwork(name)
 
 
