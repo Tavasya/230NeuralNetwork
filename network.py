@@ -43,13 +43,17 @@ def oneNetwork(name):
     for node, weight in weightsDict.items():
         G.add_edge(name, node, weight=weight)
 
-    # Get edge labels and widths
+    # Get widths(weights)
     widths = [G[u][v]["weight"] * 4 for u, v in G.edges()]
 
     #Transparency #####NEEDS WORK
+    max_weights = max(widths)
+    trans = [(weight/max_weights) for weight in widths]
+    
+    
     transList = []
     for i in widths:
-        transList.append(float(i) / 30)
+        transList.append(float(i) * 0.1)
         
 
 
@@ -58,6 +62,8 @@ def oneNetwork(name):
 
     # Extract first names for labeling
     labels = {node: node.split()[0] for node in G.nodes()}
+    
+    
 
     
     
@@ -67,21 +73,39 @@ def oneNetwork(name):
 
 
     #Node color #### NEED WORK
-    tmp_colorList = sorted(widths)
+    biggest_node = max(G.nodes, key=G.degree)
+    node_colors = ["skyblue" if node == biggest_node else "red" for node in G.nodes()]
+    
        
-        
+   
 
 
     plt.figure(figsize=(30, 30))
-    nx.draw(G, pos=pos, labels=labels, with_labels=True, node_color="red", node_size=sizes, 
-            font_color="black", font_size=20, font_family="Times New Roman", font_weight="bold", width=5)
+    nx.draw(G, 
+            pos=pos, 
+            labels=labels,
+            with_labels=True, 
+            node_color=node_colors, 
+            node_size=sizes, 
+            font_color="black", 
+            font_size=20, 
+            font_family="Times New Roman", 
+            font_weight="bold", 
+            width=5,
+            )
+    
+
 
 
     nx.draw_networkx_edges(G, pos, 
                            edgelist=G.edges(),
-                           alpha= transList
+                           width=widths,
+                           alpha=trans
                            )
+    
 
+    
+    
     plt.margins(0.02)
     plt.show()
 
@@ -134,9 +158,14 @@ def wholeNetwork():
     # Get node sizes and convert to a list
     node_sizes = {node: G.degree(node) * 1000 + 500 for node in G.nodes()}
     sizes = [node_sizes[node] for node in G.nodes()]
+    
+    #Node color
+    biggest_node = max(G.nodes, key=G.degree)
+    node_colors = ["skyblue" if node == biggest_node else "red" for node in G.nodes()]
+
 
     plt.figure(figsize=(30, 30))
-    nx.draw(G, pos=pos, labels=labels, with_labels=True, node_color="red", node_size=sizes, 
+    nx.draw(G, pos=pos, labels=labels, with_labels=True, node_color=node_colors, node_size=sizes, 
             font_color="black", font_size=20, font_family="Times New Roman", font_weight="bold", width=5)
 
 

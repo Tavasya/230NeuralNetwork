@@ -27,15 +27,15 @@ def fig_venn3(venn_type='abc'):
   bit_list = ['100','010','001','110','101','011','111']
 
   if venn_type == 'mult':
-    An_Bn_C  = 'Denis,Hayk,\nRay,Lucas,\nMisha,Naomi,\nNyles,\nSteven,Swastik'   # 100/a
+    An_Bn_C  = 'Ray,Lucas,\nMisha,Naomi,\nNyles,\nSteven'   # 100/a
     _AnBn_C  = ''   # 010/b
-    _An_BnC  = 'Denis,\nHayk,\nSwastik'      # 001/c
+    _An_BnC  = ''      # 001/c
     AnBn_C   = ''   # 110/d
     An_BnC   = 'Denis,\nHayk,\nSwastik'     # 101/e
     _AnBnC   = ''      # 011/f
     AnBnC    = ''       # 111/g
-    _An_Bn_C = '' # 000/h
-    U        = ''      # total number of elements
+    _An_Bn_C = all_names # 000/h
+    U        = '41'      # total number of elements
     venn_labels = [An_Bn_C,_AnBn_C,_An_BnC,AnBn_C,An_BnC,_AnBnC,AnBnC]
 
   # depict venn diagram
@@ -74,8 +74,24 @@ def fig_venn3(venn_type='abc'):
   plt.title('Venn Diagram')
 
   plt.show()
+  
+  print("An_Bn_C = Lucas, Misha, Naomi, Nyles, Steven")
+  print("_AnBn_C = N/A")
+  print("_An_BnC = N/A")
+  print("AnBn_C = N/A")
+  print("An_BnC = Denis, Hayk, Swastik")
+  print("_AnBnC = N/A")
+  print("AnBnC = N/A")
+  print(f"_An_Bn_C = {all_names}")
 
   return None
+
+
+  
+  
+all_names = 'Aaron, Adrian, Akmal, Andrew, Arpan, \nBen, Brandy, Connor, Dante, David, David,\nRay, Jacob, Luca, Jeremy, Juan, Julia, Justin,\nKhang, Krish, Kyle, Maxwell, Michael, Michael, Parth, \nRajvir, Randy, Ryan, Shana, Signora, Vansh, Vishrut'
+#all_names = 'Aaron, Adrian, Akmal, Andrew, \nArpan, Ben, Brandy, Connor, Dante, David, David,\nRay, Jacob, Luca, Jeremy, Juan, Julia, Justin, Khang, Krish, Kyle, Maxwell, Michael, Michael, Parth, \nRajvir, Randy, Ryan, Shana, Signora, Vansh, Vishrut'
+
 
 
 
@@ -84,6 +100,8 @@ fig_venn3("mult")
 
 
 
-import pandas as pd
 
-df = pd.read_csv('/CSC 230_ Project - Outside.csv')
+
+
+
+
